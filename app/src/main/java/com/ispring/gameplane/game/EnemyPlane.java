@@ -10,17 +10,39 @@ import java.util.List;
 /**
  * 敌机类，从上向下沿直线运动
  */
-public class EnemyPlane extends AutoSprite {
+public abstract class EnemyPlane extends AutoSprite {
 
     private int power = 1;//敌机的抗打击能力
     private int value = 0;//打一个敌机的得分
+    public int level = 0;//难度
 
-    public EnemyPlane(Bitmap bitmap){
+    public int getHurt() {
+        return hurt;
+    }
+
+    public void setHurt(int hurt) {
+        this.hurt = hurt;
+    }
+
+    public int hurt = 0;//伤害
+
+    public int getBulletCount() {
+        return bulletCount;
+    }
+
+    public void setBulletCount(int bulletCount) {
+        this.bulletCount = bulletCount+level;
+    }
+
+    protected int bulletCount;//子弹数量
+
+    public EnemyPlane(Bitmap bitmap,int level){
         super(bitmap);
+        this.level=level;
     }
 
     public void setPower(int power){
-        this.power = power;
+        this.power = power*level;
     }
 
     public int getPower(){
@@ -33,6 +55,16 @@ public class EnemyPlane extends AutoSprite {
 
     public int getValue(){
         return value;
+    }
+
+    public abstract void fight(GameView gameView);
+
+    @Override
+    protected void beforeDraw(Canvas canvas, Paint paint, GameView gameView) {
+        super.beforeDraw(canvas, paint, gameView);
+        if(bulletCount>0) {
+            fight(gameView);
+        }
     }
 
     @Override

@@ -15,6 +15,9 @@ public class CombatAircraft extends Sprite {
     private boolean collide = false;//标识战斗机是否被击中
     private int bombAwardCount = 0;//可使用的炸弹数
 
+
+    private int lifeCount = 100;//生命数
+
     //双发子弹相关
     private boolean single = true;//标识是否发的是单一的子弹
     private int bulletCount=1;
@@ -26,6 +29,11 @@ public class CombatAircraft extends Sprite {
     private int flushTime = 0;//已经闪烁的次数
     private int flushFrequency = 16;//在闪烁的时候，每隔16帧转变战斗机的可见性
     private int maxFlushTime = 10;//最大闪烁次数
+
+
+    public int getLifeCount() {
+        return lifeCount;
+    }
 
     public CombatAircraft(Bitmap bitmap){
         super(bitmap);
@@ -127,10 +135,33 @@ public class CombatAircraft extends Sprite {
         if(!collide){
             List<EnemyPlane> enemies = gameView.getAliveEnemyPlanes();
             for(EnemyPlane enemyPlane : enemies){
-                Point p = getCollidePointWithOther(enemyPlane);
+                Point p = getSelfCollidePointWithOther(enemyPlane);
                 if(p != null){
+                    enemyPlane.explode(gameView);
                     //p为战斗机与敌机的碰撞点，如果p不为null，则表明战斗机被敌机击中
-                    explode(gameView);
+                    lifeCount-=enemyPlane.getHurt();
+                    if(lifeCount<0){
+                        lifeCount=0;
+                    }
+                    if(lifeCount==0) {
+                        explode(gameView);
+                    }
+                    break;
+                }
+            }
+            List<EnemyPlaneBullet> bullets = gameView.getEnemyPlaneBullet();
+            for(EnemyPlaneBullet enemyPlane : bullets){
+                Point p = getSelfCollidePointWithOther(enemyPlane);
+                if(p != null){
+                    enemyPlane.destroy();
+                    lifeCount-=enemyPlane.getHurt();
+                    //p为战斗机与敌机的碰撞点，如果p不为null，则表明战斗机被敌机击中
+                    if(lifeCount<0){
+                        lifeCount=0;
+                    }
+                    if(lifeCount==0) {
+                        explode(gameView);
+                    }
                     break;
                 }
             }
@@ -214,6 +245,10 @@ public class CombatAircraft extends Sprite {
             List<EnemyPlane> enemyPlanes = gameView.getAliveEnemyPlanes();
             for(EnemyPlane enemyPlane : enemyPlanes){
                 enemyPlane.explode(gameView);
+            }
+            List<EnemyPlaneBullet> bullets = gameView.getEnemyPlaneBullet();
+            for(EnemyPlaneBullet bullet : bullets){
+                bullet.destroy();
             }
             bombAwardCount--;
         }

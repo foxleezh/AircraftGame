@@ -7,10 +7,31 @@ import android.graphics.Bitmap;
  */
 public class BigEnemyPlane extends EnemyPlane {
 
-    public BigEnemyPlane(Bitmap bitmap){
-        super(bitmap);
+    public BigEnemyPlane(Bitmap bitmap,int level){
+        super(bitmap,level);
         setPower(10);//大敌机抗抵抗能力为10，即需要10颗子弹才能销毁大敌机
         setValue(30000);//销毁一个大敌机可以得30000分
+        setBulletCount(1);
+        setHurt(20);
+    }
+
+    @Override
+    public void fight(GameView gameView) {
+        if(getFrame()%200==0||(level>2&&getFrame()==10)) {
+//            float degree = (float) Util.CalulateXYAnagle(getX() + getWidth() / 2, -(getY() + getHeight() / 2),
+//                    gameView.getCombatAircraft().getX() + gameView.getCombatAircraft().getWidth() / 2,
+//                    -(gameView.getCombatAircraft().getY() + gameView.getCombatAircraft().getHeight() / 2));
+            int size=10;
+            for (int i = 0; i < size; i++) {
+                CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),1);
+                sprite.setX(getX()+getWidth()/2);
+                sprite.setY(getY()+getHeight()/2);
+                sprite.setDegree((float) (2*Math.PI*i/size));
+                sprite.setSpeed(4f);
+                gameView.addSprite(sprite);
+            }
+            bulletCount--;
+        }
     }
 
 }

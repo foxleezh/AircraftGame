@@ -15,6 +15,7 @@ public class Sprite {
     private float x = 0;
     private float y = 0;
     private float collideOffset = 0;
+    private float selfCollideOffset = -50;
     private Bitmap bitmap = null;
     private boolean destroyed = false;
     private int frame = 0;//绘制的次数
@@ -108,6 +109,28 @@ public class Sprite {
         rectF.bottom += collideOffset;
         return rectF;
     }
+
+    public RectF getSelfCollideRectF(){
+        RectF rectF = getRectF();
+        rectF.left -= selfCollideOffset;
+        rectF.right += selfCollideOffset;
+        rectF.top -= selfCollideOffset;
+        rectF.bottom += selfCollideOffset;
+        return rectF;
+    }
+
+    public Point getSelfCollidePointWithOther(Sprite s){
+        Point p = null;
+        RectF rectF1 = getSelfCollideRectF();
+        RectF rectF2 = s.getCollideRectF();
+        RectF rectF = new RectF();
+        boolean isIntersect = rectF.setIntersect(rectF1, rectF2);
+        if(isIntersect){
+            p = new Point(Math.round(rectF.centerX()), Math.round(rectF.centerY()));
+        }
+        return p;
+    }
+
 
     public Point getCollidePointWithOther(Sprite s){
         Point p = null;

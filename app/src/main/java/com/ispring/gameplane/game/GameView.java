@@ -24,6 +24,9 @@ public class GameView extends View {
 
     private Paint paint;
     private Paint textPaint;
+
+
+
     private CombatAircraft combatAircraft = null;
     private List<Sprite> sprites = new ArrayList<Sprite>();
     private List<Sprite> spritesNeedAdded = new ArrayList<Sprite>();
@@ -39,7 +42,7 @@ public class GameView extends View {
     //9:pause1
     //10:pause2
     //11:bomb
-    private List<Bitmap> bitmaps = new ArrayList<Bitmap>();
+    public List<Bitmap> bitmaps = new ArrayList<Bitmap>();
     private float density = getResources().getDisplayMetrics().density;//屏幕密度
     public static final int STATUS_GAME_STARTED = 1;//游戏开始
     public static final int STATUS_GAME_PAUSED = 2;//游戏暂停
@@ -48,6 +51,7 @@ public class GameView extends View {
     private int status = STATUS_GAME_DESTROYED;//初始为销毁状态
     private long frame = 0;//总共绘制的帧数
     private long score = 0;//总得分
+    private int level = 0;//总得分
     private float fontSize = 12;//默认的字体大小，用于绘制左上角的文本
     private float fontSize2 = 20;//用于在Game Over的时候绘制Dialog中的文本
     private float borderSize = 2;//Game Over的Dialog的边框
@@ -66,6 +70,10 @@ public class GameView extends View {
     private long touchUpTime = -1;//触点弹起的时刻
     private float touchX = -1;//触点的x坐标
     private float touchY = -1;//触点的y坐标
+
+    public CombatAircraft getCombatAircraft() {
+        return combatAircraft;
+    }
 
     public GameView(Context context) {
         super(context);
@@ -336,6 +344,8 @@ public class GameView extends View {
         float scoreLeft = pauseLeft + pauseBitmap.getWidth() + 20 * density;
         float scoreTop = fontSize + pauseTop + pauseBitmap.getHeight() / 2 - fontSize / 2;
         canvas.drawText(score + "", scoreLeft, scoreTop, textPaint);
+        canvas.drawText(level + "", scoreLeft, scoreTop*2, textPaint);
+        canvas.drawText(getCombatAircraft().getLifeCount() + "", scoreLeft, scoreTop*3, textPaint);
 
         //绘制左下角
         if(combatAircraft != null && !combatAircraft.isDestroyed()){
@@ -383,10 +393,20 @@ public class GameView extends View {
         Sprite sprite = null;
         int speed = 2;
         //callTime表示createRandomSprites方法被调用的次数
-        int callTime = Math.round(frame / 30);
-        if((callTime + 1) % 25 == 0){
+        level= (int) (frame/(40*30f));
+//        if(frame<40*30){
+//            level=1;
+//        }else if(frame<80*30){
+//            level=2;
+//        }else if(frame<160*30){
+//            level=3;
+//        }else if(frame<320*30){
+//            level=4;
+//        }
+        int callTime = Math.round(frame / 30f);
+        if((callTime + 1) % 15 == 0){
             //发送道具奖品
-            if((callTime + 1) % 50 == 0){
+            if((callTime + 1) % 30 == 0){
                 //发送炸弹
                 sprite = new BombAward(bitmaps.get(7));
             }
@@ -398,19 +418,21 @@ public class GameView extends View {
         else{
             //发送敌机
             int[] nums = {0,0,0,0,0,1,0,0,1,0,0,0,0,1,1,1,1,1,1,2};
+//            int[] nums = {0,0,0,0,0};
+//            int[] nums = {2,2,2,2};
             int index = (int)Math.floor(nums.length*Math.random());
             int type = nums[index];
             if(type == 0){
                 //小敌机
-                sprite = new SmallEnemyPlane(bitmaps.get(4));
+                sprite = new SmallEnemyPlane(bitmaps.get(4),level);
             }
             else if(type == 1){
                 //中敌机
-                sprite = new MiddleEnemyPlane(bitmaps.get(5));
+                sprite = new MiddleEnemyPlane(bitmaps.get(5),level);
             }
             else if(type == 2){
                 //大敌机
-                sprite = new BigEnemyPlane(bitmaps.get(6));
+                sprite = new BigEnemyPlane(bitmaps.get(6),level);
             }
             if(type != 2){
                 if(Math.random() < 0.33){
@@ -652,6 +674,18 @@ public class GameView extends View {
         for(Sprite s : sprites){
             if(!s.isDestroyed() && s instanceof EnemyPlane){
                 EnemyPlane sprite = (EnemyPlane)s;
+                enemyPlanes.add(sprite);
+            }
+        }
+        return enemyPlanes;
+    }
+
+    //获取敌机的子弹
+    public List<EnemyPlaneBullet> getEnemyPlaneBullet(){
+        List<EnemyPlaneBullet> enemyPlanes = new ArrayList<EnemyPlaneBullet>();
+        for(Sprite s : sprites){
+            if(!s.isDestroyed() && s instanceof EnemyPlaneBullet){
+                EnemyPlaneBullet sprite = (EnemyPlaneBullet)s;
                 enemyPlanes.add(sprite);
             }
         }
