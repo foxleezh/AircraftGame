@@ -15,7 +15,12 @@ public class Sprite {
     private float x = 0;
     private float y = 0;
     private float collideOffset = 0;
-    private float selfCollideOffset = -50;
+    private float selfCollideOffset = -10;
+
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
     private Bitmap bitmap = null;
     private boolean destroyed = false;
     private int frame = 0;//绘制的次数

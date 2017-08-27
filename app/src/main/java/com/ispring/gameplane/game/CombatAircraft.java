@@ -4,7 +4,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Log;
 
 import java.util.List;
 
@@ -14,15 +16,39 @@ import java.util.List;
 public class CombatAircraft extends Sprite {
     private boolean collide = false;//标识战斗机是否被击中
     private int bombAwardCount = 0;//可使用的炸弹数
+    private Bitmap anim;
 
+    public void setCrazyBitmap(Bitmap crazyBitmap) {
+        this.crazyBitmap = crazyBitmap;
+    }
+
+    private Bitmap crazyBitmap;
+
+    private int segment = 14;//总片段数
+    private int column = 14;//列
+    private int row = 14;//排
+    private int level = 0;//最开始处于动画的第0片段
+    private int frequency = 10;//每个爆炸片段绘制2帧
+
+    private boolean isAnim;//是否执行动画
+    private boolean turnover;//是否反序执行动画
+
+
+
+    public void setFire(Bitmap fire) {
+        this.fire = fire;
+
+    }
+
+    private Bitmap fire;
 
     private int lifeCount = 100;//生命数
 
     //双发子弹相关
-    private boolean single = true;//标识是否发的是单一的子弹
-    private int bulletCount=1;
+    private boolean crazy ;//标识是否发的是单一的子弹
+    private int bulletCount=2;
     private int doubleTime = 0;//当前已经用双子弹绘制的次数
-    private int maxDoubleTime = 140;//使用双子弹最多绘制的次数
+    private int maxDoubleTime = 250;//使用双子弹最多绘制的次数
 
     //被撞击后闪烁相关
     private long beginFlushFrame = 0;//要在第beginFlushFrame帧开始闪烁战斗机
@@ -35,8 +61,13 @@ public class CombatAircraft extends Sprite {
         return lifeCount;
     }
 
-    public CombatAircraft(Bitmap bitmap){
-        super(bitmap);
+    public CombatAircraft(Bitmap anim,int column,int row){
+        super(anim);
+        this.anim=anim;
+        this.column=column;
+        this.row=row;
+        this.segment=column*row;
+        level=0;
     }
 
     @Override
@@ -46,10 +77,16 @@ public class CombatAircraft extends Sprite {
             validatePosition(canvas);
 
             //每隔7帧发射子弹
-            if(getFrame() % 7 == 0){
+            if(getFrame() % 3 == 0){
                 fight(gameView);
             }
         }
+    }
+
+    @Override
+    public void onDraw(Canvas canvas, Paint paint, GameView gameView) {
+//        canvas.drawBitmap(fire,getX(),getY(),paint);
+        super.onDraw(canvas, paint, gameView);
     }
 
     //确保战斗机完全位于Canvas范围内
@@ -81,18 +118,58 @@ public class CombatAircraft extends Sprite {
         float y = getY() - 5;
 
         float offset = getWidth() / 4;
+        float offsetDegree = 0.2f;
         float x= getX() + getWidth() / 2 - (offset * (bulletCount-1) / 2f);
 
 
 
-        for (int i = 0; i < bulletCount; i++) {
-            Bitmap yellowBulletBitmap = gameView.getYellowBulletBitmap();
-            Bullet yellowBullet = new Bullet(yellowBulletBitmap);
-            yellowBullet.moveTo(x+i*offset, y);
-            gameView.addSprite(yellowBullet);
+        float degree=0;
+
+        if(crazy){
+            float degree1=0;
+
+            int crazyBulletCount=6;
+            float x1= getX() + getWidth() / 2 - (offset * (crazyBulletCount-1) / 2f);
+            float y1= getY() - crazyBitmap.getHeight()/3f;
+
+            for (int i = 0; i < crazyBulletCount; i++) {
+                degree1= (float) (3*Math.PI/2-offsetDegree*(crazyBulletCount-1)/2f)+i*offsetDegree;
+                Bullet crazyBullet = new Bullet(crazyBitmap,degree1);
+                crazyBullet.setHurt(4);
+                crazyBullet.moveTo(x1+i*offset-crazyBullet.getWidth()/2, y1);
+                gameView.addSprite(crazyBullet);
+            }
         }
 
-//        if(single){
+        for (int i = 0; i < bulletCount; i++) {
+            if(bulletCount<6){
+                degree= (float) (3*Math.PI/2);
+            }else if(bulletCount<8){
+                degree= (float) (3*Math.PI/2-offsetDegree*(bulletCount-1)/2f)+i*offsetDegree;
+            }else {
+                if(i>1&i<6){
+                    degree= (float) (3*Math.PI/2);
+                }else {
+                    degree= (float) (3*Math.PI/2-offsetDegree*(bulletCount-1)/2f)+i*offsetDegree;
+                }
+            }
+            Bitmap yellowBulletBitmap = gameView.getYellowBulletBitmap();
+            Bullet yellowBullet = new Bullet(yellowBulletBitmap,degree);
+            yellowBullet.setHurt(crazy?2:1);
+            yellowBullet.moveTo(x+i*offset-yellowBullet.getWidth()/2, y);
+            gameView.addSprite(yellowBullet);
+        }
+        if(bulletCount==8){
+            Bitmap yellowBulletBitmap0 = gameView.getYellowBulletBitmap();
+            Bullet yellowBullet0 = new Bullet(yellowBulletBitmap0, (float) Math.PI);
+            yellowBullet0.moveTo(x+0*offset, y);
+            gameView.addSprite(yellowBullet0);
+            Bitmap yellowBulletBitmap8 = gameView.getYellowBulletBitmap();
+            Bullet yellowBullet8 = new Bullet(yellowBulletBitmap8,0);
+            yellowBullet8.moveTo(x+7*offset, y);
+            gameView.addSprite(yellowBullet8);
+        }
+//        if(crazy){
 //            //单发模式下发射单发黄色子弹
 //            Bitmap yellowBulletBitmap = gameView.getYellowBulletBitmap();
 //            Bullet yellowBullet = new Bullet(yellowBulletBitmap);
@@ -116,7 +193,7 @@ public class CombatAircraft extends Sprite {
 
 //            doubleTime++;
 //            if(doubleTime >= maxDoubleTime){
-//                single = true;
+//                crazy = true;
 //                doubleTime = 0;
 //            }
 //        }
@@ -140,6 +217,10 @@ public class CombatAircraft extends Sprite {
                     enemyPlane.explode(gameView);
                     //p为战斗机与敌机的碰撞点，如果p不为null，则表明战斗机被敌机击中
                     lifeCount-=enemyPlane.getHurt();
+                    bulletCount--;
+                    if(bulletCount<1){
+                        bulletCount=1;
+                    }
                     if(lifeCount<0){
                         lifeCount=0;
                     }
@@ -155,6 +236,10 @@ public class CombatAircraft extends Sprite {
                 if(p != null){
                     enemyPlane.destroy();
                     lifeCount-=enemyPlane.getHurt();
+                    bulletCount--;
+                    if(bulletCount<1){
+                        bulletCount=1;
+                    }
                     //p为战斗机与敌机的碰撞点，如果p不为null，则表明战斗机被敌机击中
                     if(lifeCount<0){
                         lifeCount=0;
@@ -207,11 +292,41 @@ public class CombatAircraft extends Sprite {
                     bulletAward.destroy();
                     bulletCount++;
                     if(bulletCount>5){
+                        upgrade(gameView);
                         bulletCount=5;
                     }
-//                    single = false;
+//                    crazy = false;
 //                    doubleTime = 0;
                 }
+            }
+        }
+
+        if(isAnim){
+            if(getFrame() % frequency == 0){
+                //level自加1，用于绘制下个爆炸片段
+                if(turnover){
+                    level--;
+                    if (level <=0) {
+                        level=0;
+                        isAnim=false;
+                    }
+                }else {
+                    level++;
+                    if (level >= segment) {
+                        isAnim=false;
+                        level=segment-1;
+                    }
+                }
+
+            }
+        }
+
+        if(crazy) {
+            doubleTime++;
+            if (doubleTime >= maxDoubleTime) {
+                crazy = false;
+                downgrade(gameView);
+                doubleTime = 0;
             }
         }
     }
@@ -223,11 +338,25 @@ public class CombatAircraft extends Sprite {
             setVisibility(false);
             float centerX = getX() + getWidth() / 2;
             float centerY = getY() + getHeight() / 2;
-            Explosion explosion = new Explosion(gameView.getExplosionBitmap());
+            AnimSprite explosion = new AnimSprite(gameView.getExplosionBitmap(),14,1);
             explosion.centerTo(centerX, centerY);
             gameView.addSprite(explosion);
             beginFlushFrame = getFrame() + explosion.getExplodeDurationFrame();
         }
+    }
+
+    //战斗机升级
+    private void upgrade(GameView gameView){
+        crazy =true;
+        doubleTime=0;
+        isAnim=true;
+        turnover=false;
+    }
+
+    //战斗机升级
+    private void downgrade(GameView gameView){
+        isAnim=true;
+        turnover=true;
     }
 
     //获取可用的炸弹数量
@@ -252,6 +381,40 @@ public class CombatAircraft extends Sprite {
             }
             bombAwardCount--;
         }
+    }
+
+
+    @Override
+    public float getHeight() {
+        Bitmap bitmap = getBitmap();
+        if(bitmap != null){
+            return bitmap.getHeight() / row;
+        }
+        return 0;
+    }
+
+    @Override
+    public float getWidth() {
+        Bitmap bitmap = getBitmap();
+        if(bitmap != null){
+            return bitmap.getWidth() / column;
+        }
+        return 0;
+    }
+
+    @Override
+    public Rect getBitmapSrcRec() {
+        Rect rect = super.getBitmapSrcRec();
+        int left = (int)(level%column * getWidth());
+        int top = (int)(level/column * getHeight());
+        rect.offsetTo(left, top);
+        Log.d("foxlee++++++++++","letf="+left+" top="+top);
+        return rect;
+    }
+
+    //得到绘制完整爆炸效果需要的帧数，即28帧
+    public int getExplodeDurationFrame(){
+        return segment * frequency;
     }
 
     public boolean isCollide(){

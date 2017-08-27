@@ -16,6 +16,10 @@ public class CurveSprite extends Sprite {
         this.degree = degree;
     }
 
+    public float getDegree() {
+        return degree;
+    }
+
     private float degree = 30;
 
     public CurveSprite(Bitmap bitmap){
@@ -36,6 +40,12 @@ public class CurveSprite extends Sprite {
             //在y轴方向移动speed像素
             move((float) (Math.cos(degree)*speed * gameView.getDensity()), (float) (Math.sin(degree)*speed * gameView.getDensity()));
         }
+
+    }
+
+    @Override
+    public void onDraw(Canvas canvas, Paint paint, GameView gameView) {
+        super.onDraw(canvas, paint, gameView);
     }
 
     protected void afterDraw(Canvas canvas, Paint paint, GameView gameView){

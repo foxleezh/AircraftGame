@@ -43,6 +43,7 @@ public class GameView extends View {
     //10:pause2
     //11:bomb
     public List<Bitmap> bitmaps = new ArrayList<Bitmap>();
+    public List<Bitmap> animbitmaps = new ArrayList<Bitmap>();
     private float density = getResources().getDisplayMetrics().density;//屏幕密度
     public static final int STATUS_GAME_STARTED = 1;//游戏开始
     public static final int STATUS_GAME_PAUSED = 2;//游戏暂停
@@ -54,7 +55,7 @@ public class GameView extends View {
     private int level = 0;//总得分
     private float fontSize = 12;//默认的字体大小，用于绘制左上角的文本
     private float fontSize2 = 20;//用于在Game Over的时候绘制Dialog中的文本
-    private float borderSize = 2;//Game Over的Dialog的边框
+    private float borderSize = 10;//Game Over的Dialog的边框
     private Rect continueRect = new Rect();//"继续"、"重新开始"按钮的Rect
 
     //触摸事件相关的变量
@@ -97,9 +98,9 @@ public class GameView extends View {
         //初始化paint
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
-        //设置textPaint，设置为抗锯齿，且是粗体
+        //设置textPaint，设aaa置为抗锯齿，且是粗体
         textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.FAKE_BOLD_TEXT_FLAG);
-        textPaint.setColor(0xff000000);
+        textPaint.setColor(0xffeeeeee);
         fontSize = textPaint.getTextSize();
         fontSize *= density;
         fontSize2 *= density;
@@ -107,17 +108,28 @@ public class GameView extends View {
         borderSize *= density;
     }
 
-    public void start(int[] bitmapIds){
+    public void start(int[] bitmapIds,int[] animIds){
         destroy();
         for(int bitmapId : bitmapIds){
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), bitmapId);
             bitmaps.add(bitmap);
         }
+
+        for(int bitmapId : animIds){
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), bitmapId);
+            animbitmaps.add(bitmap);
+//            if(bitmapId==R.drawable.plane1body){
+//                Bitmap plane= Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getWidth()/6f), bitmap.getHeight());
+//                bitmaps.add(plane);
+//            }
+        }
         startWhenBitmapsReady();
     }
     
     private void startWhenBitmapsReady(){
-        combatAircraft = new CombatAircraft(bitmaps.get(0));
+        combatAircraft = new CombatAircraft(animbitmaps.get(0),6,1);
+        combatAircraft.setFire(animbitmaps.get(1));
+        combatAircraft.setCrazyBitmap(bitmaps.get(13));
         //将游戏设置为开始状态
         status = STATUS_GAME_STARTED;
         postInvalidate();
@@ -126,6 +138,7 @@ public class GameView extends View {
     private void restart(){
         destroyNotRecyleBitmaps();
         startWhenBitmapsReady();
+        bonusScore=0;
     }
 
     public void pause(){
@@ -273,7 +286,7 @@ public class GameView extends View {
         h3 = 124
         h4 = 76
         */
-        int w1 = (int)(20.0 / 360.0 * canvasWidth);
+        int w1 = (int)(40.0 / 360.0 * canvasWidth);
         int w2 = canvasWidth - 2 * w1;
         int buttonWidth = (int)(140.0 / 360.0 * canvasWidth);
 
@@ -286,12 +299,12 @@ public class GameView extends View {
         canvas.translate(w1, h1);
         //绘制背景色
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0xFFD7DDDE);
+        paint.setColor(0xFF3c5caf);
         Rect rect1 = new Rect(0, 0, w2, canvasHeight - 2 * h1);
         canvas.drawRect(rect1, paint);
         //绘制边框
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(0xFF515151);
+        paint.setColor(0xFF435384);
         paint.setStrokeWidth(borderSize);
         //paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeJoin(Paint.Join.ROUND);
@@ -302,20 +315,20 @@ public class GameView extends View {
         canvas.drawText("飞机大战分数", w2 / 2, (h2 - fontSize2) / 2 + fontSize2, textPaint);
         //绘制"飞机大战分数"下面的横线
         canvas.translate(0, h2);
-        canvas.drawLine(0, 0, w2, 0, paint);
+//        canvas.drawLine(0, 0, w2, 0, paint);
         //绘制实际的分数
         String allScore = String.valueOf(getScore());
         canvas.drawText(allScore, w2 / 2, (h3 - fontSize2) / 2 + fontSize2, textPaint);
         //绘制分数下面的横线
         canvas.translate(0, h3);
-        canvas.drawLine(0, 0, w2, 0, paint);
+//        canvas.drawLine(0, 0, w2, 0, paint);
         //绘制按钮边框
         Rect rect2 = new Rect();
         rect2.left = (w2 - buttonWidth) / 2;
         rect2.right = w2 - rect2.left;
         rect2.top = (h4 - buttonHeight) / 2;
         rect2.bottom = h4 - rect2.top;
-        canvas.drawRect(rect2, paint);
+//        canvas.drawRect(rect2, paint);
         //绘制文本"继续"或"重新开始"
         canvas.translate(0, rect2.top);
         canvas.drawText(operation, w2 / 2, (buttonHeight - fontSize2) / 2 + fontSize2, textPaint);
@@ -335,7 +348,7 @@ public class GameView extends View {
     //绘制左上角的得分和左下角炸弹的数量
     private void drawScoreAndBombs(Canvas canvas){
         //绘制左上角的暂停按钮
-        Bitmap pauseBitmap = status == STATUS_GAME_STARTED ? bitmaps.get(9) : bitmaps.get(10);
+        Bitmap pauseBitmap = bitmaps.get(9);
         RectF pauseBitmapDstRecF = getPauseBitmapDstRecF();
         float pauseLeft = pauseBitmapDstRecF.left;
         float pauseTop = pauseBitmapDstRecF.top;
@@ -388,12 +401,46 @@ public class GameView extends View {
         }
     }
 
+    public long bonusScore;
+
     //生成随机的Sprite
     private void createRandomSprites(int canvasWidth){
         Sprite sprite = null;
         int speed = 2;
         //callTime表示createRandomSprites方法被调用的次数
-        level= (int) (frame/(40*30f));
+        level= (int) (frame/(40*30f))+1;
+
+        int level1=0;
+        if(level>3){
+            level1=level-3;
+        }
+
+        if(score>bonusScore+50000){
+            bonusScore+=(50000+level1*10000);
+            if(bonusScore<200000){
+                sprite = new BulletAward(animbitmaps.get(2), 5, 1);
+            }else {
+                if (Math.random() < 0.33) {
+//                //发送炸弹
+                    sprite = new BombAward(animbitmaps.get(3), 5, 1);
+                } else {
+//            sprite = new SmallEnemyPlane(bitmaps.get(4),level);
+                    sprite = new BulletAward(animbitmaps.get(2), 5, 1);
+                }
+            }
+                float spriteWidth = sprite.getWidth();
+                float spriteHeight = sprite.getHeight();
+                float x = (float)((canvasWidth - spriteWidth)*Math.random());
+                float y = -spriteHeight;
+                sprite.setX(x);
+                sprite.setY(y);
+                if(sprite instanceof AutoSprite){
+                    AutoSprite autoSprite = (AutoSprite)sprite;
+                    autoSprite.setSpeed(2);
+                }
+                addSprite(sprite);
+        }
+
 //        if(frame<40*30){
 //            level=1;
 //        }else if(frame<80*30){
@@ -403,23 +450,24 @@ public class GameView extends View {
 //        }else if(frame<320*30){
 //            level=4;
 //        }
-        int callTime = Math.round(frame / 30f);
-        if((callTime + 1) % 15 == 0){
-            //发送道具奖品
-            if((callTime + 1) % 30 == 0){
-                //发送炸弹
-                sprite = new BombAward(bitmaps.get(7));
-            }
-            else{
-                //发送双子弹
-                sprite = new BulletAward(bitmaps.get(8));
-            }
-        }
-        else{
+//        int callTime = Math.round(frame / 30f);
+//        if((callTime + 1) % 15 == 0){
+//            //发送道具奖品
+//            if((callTime + 1) % 30 == 0){
+//                //发送炸弹
+//                sprite = new BombAward(animbitmaps.get(3),5,1);
+//            }
+//            else{
+//                //发送双子弹
+////            sprite = new SmallEnemyPlane(bitmaps.get(4),level);
+//                sprite = new BulletAward(animbitmaps.get(2),5,1);
+//            }
+//        }
+//        else{
             //发送敌机
             int[] nums = {0,0,0,0,0,1,0,0,1,0,0,0,0,1,1,1,1,1,1,2};
 //            int[] nums = {0,0,0,0,0};
-//            int[] nums = {2,2,2,2};
+//            int[] nums = {1,2,2,0};
             int index = (int)Math.floor(nums.length*Math.random());
             int type = nums[index];
             if(type == 0){
@@ -439,7 +487,7 @@ public class GameView extends View {
                     speed = 4;
                 }
             }
-        }
+//        }
 
         if(sprite != null){
             float spriteWidth = sprite.getWidth();
@@ -657,6 +705,10 @@ public class GameView extends View {
     }
 
     public Bitmap getYellowBulletBitmap(){
+        return bitmaps.get(2);
+    }
+
+    public Bitmap getCrazyBulletBitmap(){
         return bitmaps.get(2);
     }
 

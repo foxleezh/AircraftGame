@@ -42,7 +42,7 @@ public abstract class EnemyPlane extends AutoSprite {
     }
 
     public void setPower(int power){
-        this.power = power*level;
+        this.power = (int) (power+level*power*0.5f);
     }
 
     public int getPower(){
@@ -82,7 +82,7 @@ public abstract class EnemyPlane extends AutoSprite {
                 if(p != null){
                     //如果有交点，说明子弹打到了飞机上
                     bullet.destroy();
-                    power--;
+                    power-=bullet.getHurt();
                     if(power <= 0){
                         //敌机已经没有能量了，执行爆炸效果
                         explode(gameView);
@@ -99,7 +99,8 @@ public abstract class EnemyPlane extends AutoSprite {
         float centerX = getX() + getWidth() / 2;
         float centerY = getY() + getHeight() / 2;
         Bitmap bitmap = gameView.getExplosionBitmap();
-        Explosion explosion = new Explosion(bitmap);
+        AnimSprite explosion = new AnimSprite(bitmap,14,1);
+        explosion.setFrequency(2);
         explosion.centerTo(centerX, centerY);
         gameView.addSprite(explosion);
 

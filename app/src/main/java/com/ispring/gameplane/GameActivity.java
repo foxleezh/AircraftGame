@@ -28,20 +28,14 @@ public class GameActivity extends Activity {
         //10:pause2
         //11:bomb
         int[] bitmapIds = {
-                R.drawable.plane,
-                R.drawable.explosion,
-                R.drawable.yellow_bullet,
-                R.drawable.blue_bullet,
-                R.drawable.small,
-                R.drawable.middle,
-                R.drawable.big,
-                R.drawable.bomb_award,
-                R.drawable.bullet_award,
-                R.drawable.pause1,
-                R.drawable.pause2,
-                R.drawable.bomb
+                R.drawable.plane,R.drawable.explosion,R.drawable.planebullet1,R.drawable.enemybullet1,R.drawable.small,
+                R.drawable.middle,R.drawable.big,R.drawable.bomb_award,R.drawable.bullet_award,R.drawable.pause,
+                R.drawable.pause1,R.drawable.bomb,R.drawable.pause_bg,R.drawable.crazybullet1
         };
-        gameView.start(bitmapIds);
+        int[] animIds = {
+                R.drawable.plane1body,R.drawable.plane1fire,R.drawable.prop3,R.drawable.prop7,
+        };
+        gameView.start(bitmapIds,animIds);
     }
 
     @Override

@@ -1,13 +1,13 @@
 package com.ispring.gameplane;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
 
-public class MainActivity extends Activity implements Button.OnClickListener {
+public class MainActivity extends AppCompatActivity implements Button.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

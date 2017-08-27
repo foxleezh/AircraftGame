@@ -9,10 +9,10 @@ public class MiddleEnemyPlane extends EnemyPlane {
 
     public MiddleEnemyPlane(Bitmap bitmap,int level){
         super(bitmap,level);
-        setPower(4);//中敌机抗抵抗能力为4，即需要4颗子弹才能销毁中敌机
+        setPower(8);//中敌机抗抵抗能力为4，即需要4颗子弹才能销毁中敌机
         setValue(6000);//销毁一个中敌机可以得6000分
         setBulletCount(1);
-        setHurt(10);
+        setHurt(30);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class MiddleEnemyPlane extends EnemyPlane {
             float degree = (float) Util.CalulateXYAnagle(getX() + getWidth() / 2, -(getY() + getHeight() / 2),
                     gameView.getCombatAircraft().getX() + gameView.getCombatAircraft().getWidth() / 2,
                     -(gameView.getCombatAircraft().getY() + gameView.getCombatAircraft().getHeight() / 2));
-            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),1);
+            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),15);
             sprite.setX(getX());
             sprite.setY(getY());
             sprite.setDegree(degree);

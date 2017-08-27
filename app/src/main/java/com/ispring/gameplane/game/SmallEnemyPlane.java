@@ -9,10 +9,10 @@ public class SmallEnemyPlane extends EnemyPlane {
 
     public SmallEnemyPlane(Bitmap bitmap,int level){
         super(bitmap, level);
-        setPower(1);//小敌机抗抵抗能力为1，即一颗子弹就可以销毁小敌机
+        setPower(4);//小敌机抗抵抗能力为1，即一颗子弹就可以销毁小敌机
         setValue(1000);//销毁一个小敌机可以得1000分
         setBulletCount(0);
-        setHurt(5);
+        setHurt(20);
     }
 
     @Override
@@ -21,9 +21,9 @@ public class SmallEnemyPlane extends EnemyPlane {
             float degree = (float) Util.CalulateXYAnagle(getX() + getWidth() / 2, -(getY() + getHeight() / 2),
                     gameView.getCombatAircraft().getX() + gameView.getCombatAircraft().getWidth() / 2,
                     -(gameView.getCombatAircraft().getY() + gameView.getCombatAircraft().getHeight() / 2));
-            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),1);
-            sprite.setX(getX());
-            sprite.setY(getY());
+            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),10);
+            sprite.setX(getX()+getWidth()/2);
+            sprite.setY(getY()+getHeight()/2);
             sprite.setDegree(degree);
             gameView.addSprite(sprite);
             bulletCount--;
