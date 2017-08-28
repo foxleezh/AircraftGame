@@ -4,8 +4,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Xfermode;
 import android.util.Log;
 
 import java.util.List;
@@ -41,6 +44,7 @@ public class CombatAircraft extends Sprite {
     }
 
     private Bitmap fire;
+    private RectF fireRect;
 
     private int lifeCount = 100;//生命数
 
@@ -68,6 +72,7 @@ public class CombatAircraft extends Sprite {
         this.row=row;
         this.segment=column*row;
         level=0;
+        mXfermode=new PorterDuffXfermode(PorterDuff.Mode.ADD);
     }
 
     @Override
@@ -83,9 +88,23 @@ public class CombatAircraft extends Sprite {
         }
     }
 
+    private Xfermode mXfermode;
+
     @Override
     public void onDraw(Canvas canvas, Paint paint, GameView gameView) {
-//        canvas.drawBitmap(fire,getX(),getY(),paint);
+        if(getVisibility()) {
+            paint.setXfermode(mXfermode);
+            Rect srcRect = getFireSrcRec();
+            if (fireRect == null) {
+                fireRect = new RectF();
+            }
+            fireRect.left = getX() + (getWidth() - srcRect.width()) / 2;
+            fireRect.top = getY() + (getHeight() - srcRect.height() / 2) / 2;
+            fireRect.right = fireRect.left + srcRect.width();
+            fireRect.bottom = fireRect.top + srcRect.height();
+            canvas.drawBitmap(fire, srcRect, fireRect, paint);
+            paint.setXfermode(null);
+        }
         super.onDraw(canvas, paint, gameView);
     }
 
@@ -259,8 +278,6 @@ public class CombatAircraft extends Sprite {
             //如果当前帧数大于等于beginFlushFrame，才表示战斗机进入销毁前的闪烁状态
             if(frame >= beginFlushFrame){
                 if((frame - beginFlushFrame) % flushFrequency == 0){
-                    boolean visible = getVisibility();
-                    setVisibility(!visible);
                     flushTime++;
                     if(flushTime >= maxFlushTime){
                         //如果战斗机闪烁的次数超过了最大的闪烁次数，那么销毁战斗机
@@ -340,6 +357,7 @@ public class CombatAircraft extends Sprite {
             float centerY = getY() + getHeight() / 2;
             AnimSprite explosion = new AnimSprite(gameView.getExplosionBitmap(),14,1);
             explosion.centerTo(centerX, centerY);
+            explosion.setFrequency(10);
             gameView.addSprite(explosion);
             beginFlushFrame = getFrame() + explosion.getExplodeDurationFrame();
         }
@@ -409,6 +427,20 @@ public class CombatAircraft extends Sprite {
         int top = (int)(level/column * getHeight());
         rect.offsetTo(left, top);
         Log.d("foxlee++++++++++","letf="+left+" top="+top);
+        return rect;
+    }
+
+
+    public Rect getFireSrcRec() {
+        Rect rect =new Rect();
+
+        int time=getFrame()/6;
+
+
+        rect.left = (int)((time % 2)* (fire.getWidth()/2f));
+        rect.top = 0;
+        rect.right = rect.left+(int) (fire.getWidth()/2f);
+        rect.bottom = fire.getHeight();
         return rect;
     }
 
