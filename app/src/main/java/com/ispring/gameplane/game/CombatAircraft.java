@@ -9,7 +9,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Xfermode;
-import android.util.Log;
 
 import java.util.List;
 
@@ -27,10 +26,12 @@ public class CombatAircraft extends Sprite {
 
     private Bitmap crazyBitmap;
 
-    private int segment = 14;//总片段数
     private int column = 14;//列
     private int row = 14;//排
-    private int level = 0;//最开始处于动画的第0片段
+    private int segment = 14;//总片段数
+    private int currentSegment = 0;//当前动画片段
+    private int currentWingsSegment = 0;//当前动画片段
+    private int wingsSegment = 60;//当前动画片段
     private int frequency = 10;//每个爆炸片段绘制2帧
 
     private boolean isAnim;//是否执行动画
@@ -44,6 +45,18 @@ public class CombatAircraft extends Sprite {
     }
 
     private Bitmap fire;
+
+    public void setWingsLeft(Bitmap wingsLeft) {
+        this.wingsLeft = wingsLeft;
+    }
+
+    private Bitmap wingsLeft;
+
+    public void setWingsRight(Bitmap wingsRight) {
+        this.wingsRight = wingsRight;
+    }
+
+    private Bitmap wingsRight;
     private RectF fireRect;
 
     private int lifeCount = 100;//生命数
@@ -71,7 +84,8 @@ public class CombatAircraft extends Sprite {
         this.column=column;
         this.row=row;
         this.segment=column*row;
-        level=0;
+        wingsSegment=getExplodeDurationFrame()/4;
+        currentSegment =0;
         mXfermode=new PorterDuffXfermode(PorterDuff.Mode.ADD);
     }
 
@@ -93,6 +107,7 @@ public class CombatAircraft extends Sprite {
     @Override
     public void onDraw(Canvas canvas, Paint paint, GameView gameView) {
         if(getVisibility()) {
+            /** 绘制喷火效果，将画笔设置为混色模式*/
             paint.setXfermode(mXfermode);
             Rect srcRect = getFireSrcRec();
             if (fireRect == null) {
@@ -103,7 +118,15 @@ public class CombatAircraft extends Sprite {
             fireRect.right = fireRect.left + srcRect.width();
             fireRect.bottom = fireRect.top + srcRect.height();
             canvas.drawBitmap(fire, srcRect, fireRect, paint);
+
+            if(isAnim||crazy){
+                canvas.drawBitmap(wingsLeft, null, getWingDstRec(true), paint);
+                canvas.drawBitmap(wingsRight, null, getWingDstRec(false), paint);
+            }
+
             paint.setXfermode(null);
+
+
         }
         super.onDraw(canvas, paint, gameView);
     }
@@ -144,14 +167,15 @@ public class CombatAircraft extends Sprite {
 
         float degree=0;
 
+        /** 进入疯狂状态*/
         if(crazy){
             float degree1=0;
-
             int crazyBulletCount=6;
             float offset1=getWidth()/16;
             float x1= getX() + getWidth() / 2 - (offset1 * (crazyBulletCount-1) / 2f);
             float y1= getY();
 
+            /** 疯狂状态发射高级子弹*/
             for (int i = 0; i < crazyBulletCount; i++) {
                 degree1= (float) (3*Math.PI/2-offsetDegree*(crazyBulletCount-1)/2f)+i*offsetDegree;
                 Bullet crazyBullet = new Bullet(crazyBitmap,degree1);
@@ -176,6 +200,7 @@ public class CombatAircraft extends Sprite {
             }
             Bitmap yellowBulletBitmap = gameView.getYellowBulletBitmap();
             Bullet yellowBullet = new Bullet(yellowBulletBitmap,degree);
+            /** 疯狂状态子弹伤害升级*/
             yellowBullet.setHurt(crazy?2:1);
             yellowBullet.moveTo(x+i*offset-yellowBullet.getWidth()/2, y);
             gameView.addSprite(yellowBullet);
@@ -190,34 +215,6 @@ public class CombatAircraft extends Sprite {
             yellowBullet8.moveTo(x+7*offset, y);
             gameView.addSprite(yellowBullet8);
         }
-//        if(crazy){
-//            //单发模式下发射单发黄色子弹
-//            Bitmap yellowBulletBitmap = gameView.getYellowBulletBitmap();
-//            Bullet yellowBullet = new Bullet(yellowBulletBitmap);
-//            yellowBullet.moveTo(x, y);
-//            gameView.addSprite(yellowBullet);
-//        }
-//        else{
-//            //双发模式下发射两发蓝色子弹
-//            float offset = getWidth() / 4;
-//            float leftX = x - offset;
-//            float rightX = x + offset;
-//            Bitmap blueBulletBitmap = gameView.getBlueBulletBitmap();
-//
-//            Bullet leftBlueBullet = new Bullet(blueBulletBitmap);
-//            leftBlueBullet.moveTo(leftX, y);
-//            gameView.addSprite(leftBlueBullet);
-//
-//            Bullet rightBlueBullet = new Bullet(blueBulletBitmap);
-//            rightBlueBullet.moveTo(rightX, y);
-//            gameView.addSprite(rightBlueBullet);
-
-//            doubleTime++;
-//            if(doubleTime >= maxDoubleTime){
-//                crazy = true;
-//                doubleTime = 0;
-//            }
-//        }
     }
 
     //战斗机如果被击中，执行爆炸效果
@@ -246,7 +243,7 @@ public class CombatAircraft extends Sprite {
                         lifeCount=0;
                     }
                     if(lifeCount==0) {
-                        explode(gameView);
+//                        explode(gameView);
                     }
                     break;
                 }
@@ -266,7 +263,7 @@ public class CombatAircraft extends Sprite {
                         lifeCount=0;
                     }
                     if(lifeCount==0) {
-                        explode(gameView);
+//                        explode(gameView);
                     }
                     break;
                 }
@@ -310,8 +307,9 @@ public class CombatAircraft extends Sprite {
                 if(p != null){
                     bulletAward.destroy();
                     bulletCount++;
+                    upgrade(gameView);
                     if(bulletCount>5){
-                        upgrade(gameView);
+//                        upgrade(gameView);
                         bulletCount=5;
                     }
 //                    crazy = false;
@@ -321,19 +319,32 @@ public class CombatAircraft extends Sprite {
         }
 
         if(isAnim){
+            if(turnover) {
+                currentWingsSegment--;
+                if(currentWingsSegment<=0){
+                    currentWingsSegment=0;
+                }
+            }else {
+                currentWingsSegment++;
+                if(currentWingsSegment>=wingsSegment){
+                    currentWingsSegment=wingsSegment-1;
+                }
+            }
             if(getFrame() % frequency == 0){
                 //level自加1，用于绘制下个爆炸片段
                 if(turnover){
-                    level--;
-                    if (level <=0) {
-                        level=0;
+                    currentSegment--;
+                    if (currentSegment <=0) {
+                        currentSegment =0;
+                        currentWingsSegment=0;
                         isAnim=false;
                     }
                 }else {
-                    level++;
-                    if (level >= segment) {
+                    currentSegment++;
+                    if (currentSegment >= segment) {
                         isAnim=false;
-                        level=segment-1;
+                        currentSegment =segment-1;
+                        currentWingsSegment=wingsSegment-1;
                     }
                 }
 
@@ -373,7 +384,7 @@ public class CombatAircraft extends Sprite {
         turnover=false;
     }
 
-    //战斗机升级
+    //战斗机降级
     private void downgrade(GameView gameView){
         isAnim=true;
         turnover=true;
@@ -425,14 +436,30 @@ public class CombatAircraft extends Sprite {
     @Override
     public Rect getBitmapSrcRec() {
         Rect rect = super.getBitmapSrcRec();
-        int left = (int)(level%column * getWidth());
-        int top = (int)(level/column * getHeight());
+        int left = (int)(currentSegment %column * getWidth());
+        int top = (int)(currentSegment /column * getHeight());
         rect.offsetTo(left, top);
-        Log.d("foxlee++++++++++","letf="+left+" top="+top);
         return rect;
     }
 
 
+    public RectF getWingDstRec(boolean isleft){
+
+        float rate=((float)currentWingsSegment)/wingsSegment;
+        float rate1=2;
+        if(isleft) {
+            fireRect.left = getX() - getWidth() / 4 + getWidth() / 2 * (1 - rate * rate1);
+            fireRect.top = getY() + getHeight() / 2 * (1 - rate * rate1);
+        }else {
+            fireRect.left = getX() + getWidth() / 4 + getWidth() / 2 * (1 - rate * rate1);
+            fireRect.top = getY() + getHeight() / 2 * (1 - rate * rate1);
+        }
+        fireRect.right=fireRect.left+getWidth()*rate*rate1;
+        fireRect.bottom=fireRect.top+getHeight()*rate*rate1;
+        return fireRect;
+    }
+
+    //
     public Rect getFireSrcRec() {
         Rect rect =new Rect();
 

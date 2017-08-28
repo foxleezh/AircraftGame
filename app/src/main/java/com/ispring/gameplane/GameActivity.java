@@ -30,7 +30,7 @@ public class GameActivity extends Activity {
         int[] bitmapIds = {
                 R.drawable.explosion,R.drawable.planebullet1,R.drawable.enemybullet1,R.drawable.small,
                 R.drawable.middle,R.drawable.big,R.drawable.pause,R.drawable.main_bg,
-                R.drawable.bomb,R.drawable.crazybullet1
+                R.drawable.bomb,R.drawable.crazybullet1,R.drawable.plane1wing,R.drawable.plane1wing1
         };
         int[] animIds = {
                 R.drawable.plane1body,R.drawable.plane1fire,R.drawable.prop3,R.drawable.prop7,

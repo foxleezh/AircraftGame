@@ -136,6 +136,8 @@ public class GameView extends View {
         combatAircraft = new CombatAircraft(animbitmaps.get(R.drawable.plane1body),6,1);
         combatAircraft.setFire(animbitmaps.get(R.drawable.plane1fire));
         combatAircraft.setCrazyBitmap(bitmaps.get(R.drawable.crazybullet1));
+        combatAircraft.setWingsLeft(bitmaps.get(R.drawable.plane1wing));
+        combatAircraft.setWingsRight(bitmaps.get(R.drawable.plane1wing1));
         //将游戏设置为开始状态
         status = STATUS_GAME_STARTED;
         postInvalidate();
@@ -426,7 +428,7 @@ public class GameView extends View {
             level1=level-3;
         }
 
-        int offset=50000;
+        int offset=30000;
 
         if(score>bonusScore+offset){
             bonusScore+=(offset+level1*offset/5);
