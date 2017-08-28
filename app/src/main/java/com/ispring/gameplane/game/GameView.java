@@ -113,7 +113,12 @@ public class GameView extends View {
         destroy();
         for(int bitmapId : bitmapIds){
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), bitmapId);
-            bitmaps.put(bitmapId,bitmap);
+            if(bitmapId==R.drawable.main_bg){
+                Bitmap backBitmap = Util.createRepeater(2,bitmap);
+                bitmaps.put(bitmapId,backBitmap);
+            }else {
+                bitmaps.put(bitmapId,bitmap);
+            }
         }
 
         for(int bitmapId : animIds){
@@ -349,6 +354,11 @@ public class GameView extends View {
     //绘制左上角的得分和左下角炸弹的数量
     private void drawScoreAndBombs(Canvas canvas){
         //绘制左上角的暂停按钮
+        Bitmap main_bg = bitmaps.get(R.drawable.main_bg);
+        Rect backResRect = getBackBitmapResRecF();
+        canvas.drawBitmap(main_bg, backResRect,new RectF(0,0,canvas.getWidth(),canvas.getHeight()), paint);
+
+
         Bitmap pauseBitmap = bitmaps.get(R.drawable.pause);
         RectF pauseBitmapDstRecF = getPauseBitmapDstRecF();
         float pauseLeft = pauseBitmapDstRecF.left;
@@ -647,6 +657,26 @@ public class GameView extends View {
         recF.top = 15 * density;
         recF.right = recF.left + pauseBitmap.getWidth();
         recF.bottom = recF.top + pauseBitmap.getHeight();
+        return recF;
+    }
+
+
+    private Rect getBackBitmapResRecF(){
+
+        Bitmap backBitmap = bitmaps.get(R.drawable.main_bg);
+        Rect recF = new Rect();
+        float rate=((float) getHeight())/getWidth();
+
+        int rectHeight= (int) (backBitmap.getHeight()/2f);
+        int rectWidth= (int) ((backBitmap.getHeight()/2)/rate);
+        int speed=2;
+
+
+        recF.left = (int) ((backBitmap.getWidth()-rectWidth)/2f);
+
+        recF.top = (int) (backBitmap.getHeight()/2-(frame*speed)%(backBitmap.getHeight()/2));
+        recF.right = recF.left+rectWidth;
+        recF.bottom = recF.top + rectHeight;
         return recF;
     }
 
