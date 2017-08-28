@@ -15,6 +15,7 @@ public class BulletAward extends Award {
 //        setDegree((float) (Math.random()*2*Math.PI));
         setDegree((float) (Math.PI/4));
         setFrequency(6);
+        setChangeOritation(false);
     }
 
     @Override

@@ -99,7 +99,7 @@ public class CombatAircraft extends Sprite {
                 fireRect = new RectF();
             }
             fireRect.left = getX() + (getWidth() - srcRect.width()) / 2;
-            fireRect.top = getY() + (getHeight() - srcRect.height() / 2) / 2;
+            fireRect.top = getY()-getHeight()/4;
             fireRect.right = fireRect.left + srcRect.width();
             fireRect.bottom = fireRect.top + srcRect.height();
             canvas.drawBitmap(fire, srcRect, fireRect, paint);
@@ -137,7 +137,7 @@ public class CombatAircraft extends Sprite {
         float y = getY() - 5;
 
         float offset = getWidth() / 4;
-        float offsetDegree = 0.2f;
+        float offsetDegree = 0.15f;
         float x= getX() + getWidth() / 2 - (offset * (bulletCount-1) / 2f);
 
 
@@ -148,14 +148,16 @@ public class CombatAircraft extends Sprite {
             float degree1=0;
 
             int crazyBulletCount=6;
-            float x1= getX() + getWidth() / 2 - (offset * (crazyBulletCount-1) / 2f);
-            float y1= getY() - crazyBitmap.getHeight()/3f;
+            float offset1=getWidth()/16;
+            float x1= getX() + getWidth() / 2 - (offset1 * (crazyBulletCount-1) / 2f);
+            float y1= getY();
 
             for (int i = 0; i < crazyBulletCount; i++) {
                 degree1= (float) (3*Math.PI/2-offsetDegree*(crazyBulletCount-1)/2f)+i*offsetDegree;
                 Bullet crazyBullet = new Bullet(crazyBitmap,degree1);
                 crazyBullet.setHurt(4);
-                crazyBullet.moveTo(x1+i*offset-crazyBullet.getWidth()/2, y1);
+                crazyBullet.setSpeed(100);
+                crazyBullet.moveTo(x1+i*offset1-crazyBullet.getWidth()/2, y1);
                 gameView.addSprite(crazyBullet);
             }
         }

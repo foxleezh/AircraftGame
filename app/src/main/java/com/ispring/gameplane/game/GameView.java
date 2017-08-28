@@ -426,9 +426,11 @@ public class GameView extends View {
             level1=level-3;
         }
 
-        if(score>bonusScore+50000){
-            bonusScore+=(50000+level1*10000);
-            if(bonusScore<200000){
+        int offset=50000;
+
+        if(score>bonusScore+offset){
+            bonusScore+=(offset+level1*offset/5);
+            if(bonusScore<offset*4){
                 sprite = new BulletAward(animbitmaps.get(R.drawable.prop3), 5, 1);
             }else {
                 if (Math.random() < 0.33) {
@@ -478,7 +480,7 @@ public class GameView extends View {
             //发送敌机
             int[] nums = {0,0,0,0,0,1,0,0,1,0,0,0,0,1,1,1,1,1,1,2};
 //            int[] nums = {0,0,0,0,0};
-//            int[] nums = {1,2,2,0};
+//            int[] nums = {5};
             int index = (int)Math.floor(nums.length*Math.random());
             int type = nums[index];
             if(type == 0){

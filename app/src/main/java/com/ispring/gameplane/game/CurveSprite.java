@@ -12,6 +12,12 @@ public class CurveSprite extends Sprite {
     //每帧移动的像素数,以向下为正
     private float speed = 2.2f;
 
+    public void setChangeOritation(boolean changeOritation) {
+        this.changeOritation = changeOritation;
+    }
+
+    private boolean changeOritation=true;
+
     public void setDegree(float degree) {
         this.degree = degree;
     }
@@ -45,7 +51,14 @@ public class CurveSprite extends Sprite {
 
     @Override
     public void onDraw(Canvas canvas, Paint paint, GameView gameView) {
-        super.onDraw(canvas, paint, gameView);
+        if(changeOritation) {
+            float newDegree = (float) (degree + Math.PI / 2);
+            canvas.rotate((float) (newDegree / Math.PI * 180), getX() + getWidth() / 2f, getY() + getHeight() / 2);
+            super.onDraw(canvas, paint, gameView);
+            canvas.rotate((float) (-newDegree / Math.PI * 180), getX() + getWidth() / 2f, getY() + getHeight() / 2);
+        }else {
+            super.onDraw(canvas, paint, gameView);
+        }
     }
 
     protected void afterDraw(Canvas canvas, Paint paint, GameView gameView){
