@@ -2,6 +2,8 @@ package com.ispring.gameplane.game;
 
 import android.graphics.Bitmap;
 
+import com.ispring.gameplane.R;
+
 /**
  * 大敌机类，体积大，抗打击能力强
  */
@@ -23,7 +25,7 @@ public class BigEnemyPlane extends EnemyPlane {
 //                    -(gameView.getCombatAircraft().getY() + gameView.getCombatAircraft().getHeight() / 2));
             int size=15;
             for (int i = 0; i < size; i++) {
-                CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),20);
+                CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(R.drawable.enemybullet1),20);
                 sprite.setX(getX()+getWidth()/2);
                 sprite.setY(getY()+getHeight()/2);
                 sprite.setDegree((float) (2*Math.PI*i/size));

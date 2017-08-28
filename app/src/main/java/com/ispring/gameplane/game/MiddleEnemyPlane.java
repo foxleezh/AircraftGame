@@ -2,6 +2,8 @@ package com.ispring.gameplane.game;
 
 import android.graphics.Bitmap;
 
+import com.ispring.gameplane.R;
+
 /**
  * 中敌机类，体积中等，抗打击能力中等
  */
@@ -21,7 +23,7 @@ public class MiddleEnemyPlane extends EnemyPlane {
             float degree = (float) Util.CalulateXYAnagle(getX() + getWidth() / 2, -(getY() + getHeight() / 2),
                     gameView.getCombatAircraft().getX() + gameView.getCombatAircraft().getWidth() / 2,
                     -(gameView.getCombatAircraft().getY() + gameView.getCombatAircraft().getHeight() / 2));
-            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),15);
+            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(R.drawable.enemybullet1),15);
             sprite.setX(getX());
             sprite.setY(getY());
             sprite.setDegree(degree);

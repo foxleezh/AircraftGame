@@ -2,6 +2,8 @@ package com.ispring.gameplane.game;
 
 import android.graphics.Bitmap;
 
+import com.ispring.gameplane.R;
+
 /**
  * 小敌机类，体积小，抗打击能力低
  */
@@ -21,7 +23,7 @@ public class SmallEnemyPlane extends EnemyPlane {
             float degree = (float) Util.CalulateXYAnagle(getX() + getWidth() / 2, -(getY() + getHeight() / 2),
                     gameView.getCombatAircraft().getX() + gameView.getCombatAircraft().getWidth() / 2,
                     -(gameView.getCombatAircraft().getY() + gameView.getCombatAircraft().getHeight() / 2));
-            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(3),10);
+            CurveSprite sprite = new EnemyPlaneBullet(gameView.bitmaps.get(R.drawable.enemybullet1),10);
             sprite.setX(getX()+getWidth()/2);
             sprite.setY(getY()+getHeight()/2);
             sprite.setDegree(degree);

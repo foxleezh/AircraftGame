@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -42,8 +43,8 @@ public class GameView extends View {
     //9:pause1
     //10:pause2
     //11:bomb
-    public List<Bitmap> bitmaps = new ArrayList<Bitmap>();
-    public List<Bitmap> animbitmaps = new ArrayList<Bitmap>();
+    public SparseArray<Bitmap> bitmaps = new SparseArray<Bitmap>();
+    public SparseArray<Bitmap> animbitmaps = new SparseArray<Bitmap>();
     private float density = getResources().getDisplayMetrics().density;//屏幕密度
     public static final int STATUS_GAME_STARTED = 1;//游戏开始
     public static final int STATUS_GAME_PAUSED = 2;//游戏暂停
@@ -112,12 +113,12 @@ public class GameView extends View {
         destroy();
         for(int bitmapId : bitmapIds){
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), bitmapId);
-            bitmaps.add(bitmap);
+            bitmaps.put(bitmapId,bitmap);
         }
 
         for(int bitmapId : animIds){
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), bitmapId);
-            animbitmaps.add(bitmap);
+            animbitmaps.put(bitmapId,bitmap);
 //            if(bitmapId==R.drawable.plane1body){
 //                Bitmap plane= Bitmap.createBitmap(bitmap, 0, 0, (int) (bitmap.getWidth()/6f), bitmap.getHeight());
 //                bitmaps.add(plane);
@@ -127,9 +128,9 @@ public class GameView extends View {
     }
     
     private void startWhenBitmapsReady(){
-        combatAircraft = new CombatAircraft(animbitmaps.get(0),6,1);
-        combatAircraft.setFire(animbitmaps.get(1));
-        combatAircraft.setCrazyBitmap(bitmaps.get(13));
+        combatAircraft = new CombatAircraft(animbitmaps.get(R.drawable.plane1body),6,1);
+        combatAircraft.setFire(animbitmaps.get(R.drawable.plane1fire));
+        combatAircraft.setCrazyBitmap(bitmaps.get(R.drawable.crazybullet1));
         //将游戏设置为开始状态
         status = STATUS_GAME_STARTED;
         postInvalidate();
@@ -185,7 +186,7 @@ public class GameView extends View {
         //第一次绘制时，将战斗机移到Canvas最下方，在水平方向的中心
         if(frame == 0){
             float centerX = canvas.getWidth() / 2;
-            float centerY = canvas.getHeight() - combatAircraft.getHeight() / 2;
+            float centerY = canvas.getHeight() - combatAircraft.getHeight();
             combatAircraft.centerTo(centerX, centerY);
         }
 
@@ -348,7 +349,7 @@ public class GameView extends View {
     //绘制左上角的得分和左下角炸弹的数量
     private void drawScoreAndBombs(Canvas canvas){
         //绘制左上角的暂停按钮
-        Bitmap pauseBitmap = bitmaps.get(9);
+        Bitmap pauseBitmap = bitmaps.get(R.drawable.pause);
         RectF pauseBitmapDstRecF = getPauseBitmapDstRecF();
         float pauseLeft = pauseBitmapDstRecF.left;
         float pauseTop = pauseBitmapDstRecF.top;
@@ -365,7 +366,7 @@ public class GameView extends View {
             int bombCount = combatAircraft.getBombCount();
             if(bombCount > 0){
                 //绘制左下角的炸弹
-                Bitmap bombBitmap = bitmaps.get(11);
+                Bitmap bombBitmap = bitmaps.get(R.drawable.bomb);
                 float bombTop = canvas.getHeight() - bombBitmap.getHeight();
                 canvas.drawBitmap(bombBitmap, 0, bombTop, paint);
                 //绘制左下角的炸弹数量
@@ -418,14 +419,14 @@ public class GameView extends View {
         if(score>bonusScore+50000){
             bonusScore+=(50000+level1*10000);
             if(bonusScore<200000){
-                sprite = new BulletAward(animbitmaps.get(2), 5, 1);
+                sprite = new BulletAward(animbitmaps.get(R.drawable.prop3), 5, 1);
             }else {
                 if (Math.random() < 0.33) {
 //                //发送炸弹
-                    sprite = new BombAward(animbitmaps.get(3), 5, 1);
+                    sprite = new BombAward(animbitmaps.get(R.drawable.prop7), 5, 1);
                 } else {
 //            sprite = new SmallEnemyPlane(bitmaps.get(4),level);
-                    sprite = new BulletAward(animbitmaps.get(2), 5, 1);
+                    sprite = new BulletAward(animbitmaps.get(R.drawable.prop3), 5, 1);
                 }
             }
                 float spriteWidth = sprite.getWidth();
@@ -472,15 +473,15 @@ public class GameView extends View {
             int type = nums[index];
             if(type == 0){
                 //小敌机
-                sprite = new SmallEnemyPlane(bitmaps.get(4),level);
+                sprite = new SmallEnemyPlane(bitmaps.get(R.drawable.small),level);
             }
             else if(type == 1){
                 //中敌机
-                sprite = new MiddleEnemyPlane(bitmaps.get(5),level);
+                sprite = new MiddleEnemyPlane(bitmaps.get(R.drawable.middle),level);
             }
             else if(type == 2){
                 //大敌机
-                sprite = new BigEnemyPlane(bitmaps.get(6),level);
+                sprite = new BigEnemyPlane(bitmaps.get(R.drawable.big),level);
             }
             if(type != 2){
                 if(Math.random() < 0.33){
@@ -640,7 +641,7 @@ public class GameView extends View {
     }
 
     private RectF getPauseBitmapDstRecF(){
-        Bitmap pauseBitmap = status == STATUS_GAME_STARTED ? bitmaps.get(9) : bitmaps.get(10);
+        Bitmap pauseBitmap = bitmaps.get(R.drawable.pause);
         RectF recF = new RectF();
         recF.left = 15 * density;
         recF.top = 15 * density;
@@ -677,9 +678,12 @@ public class GameView extends View {
     public void destroy(){
         destroyNotRecyleBitmaps();
 
+        int key=0;
+
         //释放Bitmap资源
-        for(Bitmap bitmap : bitmaps){
-            bitmap.recycle();
+        for (int i = 0; i < bitmaps.size(); i++) {
+            key = bitmaps.keyAt(i);
+            bitmaps.get(key).recycle();
         }
         bitmaps.clear();
     }
@@ -705,19 +709,11 @@ public class GameView extends View {
     }
 
     public Bitmap getYellowBulletBitmap(){
-        return bitmaps.get(2);
-    }
-
-    public Bitmap getCrazyBulletBitmap(){
-        return bitmaps.get(2);
-    }
-
-    public Bitmap getBlueBulletBitmap(){
-        return bitmaps.get(3);
+        return bitmaps.get(R.drawable.planebullet1);
     }
 
     public Bitmap getExplosionBitmap(){
-        return bitmaps.get(1);
+        return bitmaps.get(R.drawable.explosion);
     }
 
     //获取处于活动状态的敌机
